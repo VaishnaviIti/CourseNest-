@@ -40,11 +40,14 @@ export const getAllCourses = async (req, res) => {
       .populate('lessons')
       .sort(sortOption);
 
+    console.log(`Found ${courses.length} courses`);
+    
     res.json({
       count: courses.length,
       courses,
     });
   } catch (error) {
+    console.error('Error in getAllCourses:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
