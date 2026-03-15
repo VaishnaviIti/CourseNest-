@@ -14,7 +14,11 @@ const connectDB = async () => {
     const maskedUri = mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
     console.log(`Connecting to MongoDB... ${maskedUri.substring(0, 50)}...`);
     
-    const conn = await mongoose.connect(mongoUri);
+    // Add connection options to handle SRV issues
+    const conn = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
