@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
-  const error = { ...err };
+  let error = { ...err };
   error.message = err.message;
 
   // Log to console for dev
