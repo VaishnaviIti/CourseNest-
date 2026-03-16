@@ -69,14 +69,40 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test-db', async (req, res) => {
   try {
     const mongoose = await import('mongoose');
-    const isConnected = mongoose.connection.readyState === 1;
+    const connection = mongoose.connection;
+    const isConnected = connection && connection.readyState === 1;
     res.json({
       database: isConnected ? 'Connected' : 'Disconnected',
       uri_configured: !!process.env.MONGODB_URI,
-      node_env: process.env.NODE_ENV
+      node_env: process.env.NODE_ENV || 'not-set'
     });
   } catch (error) {
+    console.error('Test DB error:', error.message);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Manual seed endpoint (for production use)
+app.get('/api/seed-database', async (req, res) => {
+  try {
+    console.log('Starting database seed...');
+    const { exec } = await import('child_process');
+    const util = await import('util');
+    const execPromise = util.promisify(exec);
+    
+    const result = await execPromise('cd backend && npm run seed');
+    console.log('Seed result:', result.stdout);
+    
+    res.json({ 
+      message: 'Database seeded successfully!',
+      output: result.stdout 
+    });
+  } catch (error) {
+    console.error('Seed error:', error.message);
+    res.status(500).json({ 
+      error: 'Failed to seed database',
+      details: error.message 
+    });
   }
 });
 
