@@ -56,7 +56,28 @@ app.use('/api/admin', adminRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'Server is running', timestamp: new Date().toISOString() });
+  console.log('Health check endpoint called');
+  res.json({ 
+    status: 'Server is running', 
+    timestamp: new Date().toISOString(),
+    node_version: process.version,
+    platform: process.platform
+  });
+});
+
+// Test database connection route
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const mongoose = await import('mongoose');
+    const isConnected = mongoose.connection.readyState === 1;
+    res.json({
+      database: isConnected ? 'Connected' : 'Disconnected',
+      uri_configured: !!process.env.MONGODB_URI,
+      node_env: process.env.NODE_ENV
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Error handler
