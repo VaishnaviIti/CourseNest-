@@ -29,7 +29,25 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.path} - ${res.statusCode}`);
+  });
+  next();
+});
+
 // Routes
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'CourseNest API Server', 
+    status: 'running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enroll', enrollRoutes);
@@ -43,6 +61,15 @@ app.get('/api/health', (req, res) => {
 
 // Error handler
 app.use(errorHandler);
+
+// Global 404 handler
+app.use((req, res) => {
+  console.log(`404 Not Found: ${req.path}`);
+  res.status(404).json({ 
+    message: 'Route not found', 
+    path: req.path 
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 
