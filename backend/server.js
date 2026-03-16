@@ -86,11 +86,12 @@ app.get('/api/test-db', async (req, res) => {
 app.get('/api/seed-database', async (req, res) => {
   try {
     console.log('Starting database seed...');
+    // Run seed script directly without cd since we're already in backend folder on Render
     const { exec } = await import('child_process');
     const util = await import('util');
     const execPromise = util.promisify(exec);
     
-    const result = await execPromise('cd backend && npm run seed');
+    const result = await execPromise('npm run seed');
     console.log('Seed result:', result.stdout);
     
     res.json({ 
